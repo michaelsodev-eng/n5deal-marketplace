@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Asset, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
@@ -124,6 +125,23 @@ function buildOrderBy(
 
   return { createdAt: "desc" };
 }
+
+export const getPublishedAssetById = cache(
+  async (id: string): Promise<MarketplaceAsset | null> => {
+    const asset = await prisma.asset.findFirst({
+      where: {
+        id,
+        status: "PUBLISHED",
+      },
+    });
+
+    if (!asset) {
+      return null;
+    }
+
+    return mapAsset(asset);
+  },
+);
 
 export async function getMarketplacePageData(
   filters: MarketplaceFilterState,

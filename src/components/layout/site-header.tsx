@@ -21,7 +21,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
       <Container size="wide" className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
+        <Link href="/" className="flex cursor-pointer items-center gap-2.5" onClick={() => setOpen(false)}>
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-[11px] font-semibold tracking-tight text-white">
             N5
           </span>
@@ -36,7 +36,7 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
+                "cursor-pointer text-sm font-medium transition-colors hover:text-primary",
                 pathname === item.href ? "text-primary" : "text-muted",
               )}
             >
@@ -52,7 +52,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-slate-50 lg:hidden"
+          className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-foreground hover:bg-slate-50 lg:hidden"
           aria-expanded={open}
           aria-label={open ? "Закрити меню" : "Відкрити меню"}
           onClick={() => setOpen((value) => !value)}
@@ -88,7 +88,7 @@ export function SiteHeader() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-lg px-3 py-2.5 text-sm font-medium",
+                  "cursor-pointer rounded-lg px-3 py-2.5 text-sm font-medium",
                   pathname === item.href
                     ? "bg-primary-soft text-primary"
                     : "text-foreground hover:bg-slate-50",

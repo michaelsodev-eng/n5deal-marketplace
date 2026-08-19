@@ -105,7 +105,7 @@ export function AssetCard({ asset }: AssetCardProps) {
         ) : null}
 
         <div className="mt-5 flex flex-col gap-2 sm:mt-auto sm:flex-row">
-          <Button variant="primary" className="sm:flex-1">
+          <Button href={`/assets/${asset.id}`} variant="primary" className="sm:flex-1">
             Переглянути деталі
           </Button>
           <Button variant="outline" className="sm:flex-1">

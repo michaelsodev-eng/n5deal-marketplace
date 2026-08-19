@@ -49,3 +49,18 @@ body {
   background: var(--primary-soft);
   color: var(--foreground);
 }
+
+a,
+button,
+select,
+summary,
+[role="tab"],
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}

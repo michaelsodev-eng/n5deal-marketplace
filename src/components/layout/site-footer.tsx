@@ -26,7 +26,7 @@ export function SiteFooter() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm text-muted transition-colors hover:text-primary"
+              className="cursor-pointer text-sm text-muted transition-colors hover:text-primary"
             >
               {item.label}
             </Link>

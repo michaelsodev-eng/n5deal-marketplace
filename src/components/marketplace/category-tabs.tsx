@@ -21,7 +21,7 @@ export function CategoryTabs({ categories, value, onChange }: CategoryTabsProps)
               aria-selected={selected}
               onClick={() => onChange(category)}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                "cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-colors",
                 selected
                   ? "border-primary bg-primary text-white"
                   : "border-border bg-surface text-muted hover:border-primary/30 hover:text-foreground",

@@ -55,8 +55,8 @@ export function MarketplacePagination({
           className={cn(
             "inline-flex h-9 items-center rounded-lg border border-border px-3 text-sm font-medium",
             page <= 1
-              ? "pointer-events-none text-muted"
-              : "bg-surface text-foreground hover:bg-slate-50",
+              ? "pointer-events-none cursor-not-allowed text-muted"
+              : "cursor-pointer bg-surface text-foreground hover:bg-slate-50",
           )}
         >
           Назад
@@ -76,8 +76,8 @@ export function MarketplacePagination({
                 className={cn(
                   "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2.5 text-sm font-medium",
                   item === page
-                    ? "border-primary bg-primary text-white"
-                    : "border-border bg-surface text-foreground hover:bg-slate-50",
+                    ? "cursor-pointer border-primary bg-primary text-white"
+                    : "cursor-pointer border-border bg-surface text-foreground hover:bg-slate-50",
                 )}
               >
                 {item}
@@ -94,8 +94,8 @@ export function MarketplacePagination({
           className={cn(
             "inline-flex h-9 items-center rounded-lg border border-border px-3 text-sm font-medium",
             page >= totalPages
-              ? "pointer-events-none text-muted"
-              : "bg-surface text-foreground hover:bg-slate-50",
+              ? "pointer-events-none cursor-not-allowed text-muted"
+              : "cursor-pointer bg-surface text-foreground hover:bg-slate-50",
           )}
         >
           Далі
