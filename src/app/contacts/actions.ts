@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import {
   createBuyerContactRequest,
+  createSellerContactRequest,
   respondToContactRequest,
 } from "@/lib/contact-requests";
 
@@ -69,6 +70,48 @@ export async function createContactRequestAction(
   return { success: true };
 }
 
+export async function createSellerContactRequestAction(
+  buyerProfileId: string,
+  _prevState: ContactActionState,
+  formData: FormData,
+): Promise<ContactActionState> {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.role !== "SELLER") {
+    return { error: "Лише продавці можуть надсилати запити покупцям." };
+  }
+
+  const parsed = parseMessage(formData);
+
+  if (typeof parsed !== "string") {
+    return parsed;
+  }
+
+  try {
+    const result = await createSellerContactRequest({
+      sellerId: user.id,
+      buyerProfileId,
+      message: parsed,
+    });
+
+    if (!result.ok) {
+      return { error: result.error };
+    }
+  } catch (error) {
+    console.error("Create seller contact request failed", error);
+    return { error: "Не вдалося надіслати запит. Спробуйте пізніше." };
+  }
+
+  revalidatePath(`/buyers/${buyerProfileId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/manager");
+  return { success: true };
+}
+
 export async function respondToContactRequestAction(
   requestId: string,
   _prevState: ContactActionState,
@@ -80,8 +123,8 @@ export async function respondToContactRequestAction(
     redirect("/login");
   }
 
-  if (user.role !== "SELLER") {
-    return { error: "Лише продавець може відповісти на запит." };
+  if (user.role !== "SELLER" && user.role !== "BUYER") {
+    return { error: "Немає доступу для цієї дії." };
   }
 
   const intent = String(formData.get("intent") ?? "");

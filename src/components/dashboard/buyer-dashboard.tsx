@@ -19,7 +19,7 @@ export function BuyerDashboard({ data }: BuyerDashboardProps) {
         </p>
         <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight break-words text-foreground sm:text-3xl">
               Вітаємо, {data.companyName}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
@@ -28,6 +28,9 @@ export function BuyerDashboard({ data }: BuyerDashboardProps) {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            <Button href="/dashboard/profile" variant="outline">
+              Редагувати профіль
+            </Button>
             <Button href="/assets">Переглянути майданчик</Button>
             <LogoutButton />
           </div>
@@ -66,6 +69,19 @@ export function BuyerDashboard({ data }: BuyerDashboardProps) {
               </Button>
             </div>
           )}
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Вхідні запити
+          </h2>
+          <ContactRequestList
+            requests={data.incomingRequests}
+            variant="buyer"
+            showActions
+            emptyTitle="Вхідних запитів ще немає"
+            emptyDescription="Коли продавець надішле запит, він з’явиться тут."
+          />
         </div>
 
         <div className="mt-10">

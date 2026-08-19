@@ -19,12 +19,12 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
         </p>
         <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight break-words text-foreground sm:text-3xl">
               Вітаємо, {data.companyName}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Керуйте своїми активами та переглядайте вхідні запити від
-              покупців.
+              Керуйте своїми активами, вхідними запитами від покупців та
+              надісланими запитами.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -75,8 +75,22 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
           <ContactRequestList
             requests={data.incomingRequests}
             variant="seller"
+            showActions
             emptyTitle="Вхідних запитів ще немає"
             emptyDescription="Коли покупець надішле запит щодо вашого активу, він з’явиться тут."
+          />
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Надіслані запити
+          </h2>
+          <ContactRequestList
+            requests={data.sentRequests}
+            variant="seller"
+            showActions={false}
+            emptyTitle="Ви ще не надсилали запитів"
+            emptyDescription="Відкрийте профіль покупця, щоб надіслати запит."
           />
         </div>
       </Container>

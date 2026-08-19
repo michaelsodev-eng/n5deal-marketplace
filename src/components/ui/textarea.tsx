@@ -23,7 +23,7 @@ export function Textarea({
       <textarea
         id={textareaId}
         className={cn(
-          "min-h-32 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none placeholder:text-muted/80 transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20",
+          "min-h-32 w-full min-w-0 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none placeholder:text-muted/80 transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-60",
           className,
         )}
         {...props}

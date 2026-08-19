@@ -15,6 +15,7 @@ export type BuyerDashboardData = {
   recommendedCount: number;
   recommendedAssets: MarketplaceAsset[];
   sentRequests: ContactRequestListItem[];
+  incomingRequests: ContactRequestListItem[];
 };
 
 export type SellerDashboardData = {
@@ -24,14 +25,24 @@ export type SellerDashboardData = {
   contactCount: number;
   assets: MarketplaceAsset[];
   incomingRequests: ContactRequestListItem[];
+  sentRequests: ContactRequestListItem[];
 };
 
-export type ManagerRecentUser = {
+export type ManagerUserItem = {
   id: string;
   email: string;
   role: "BUYER" | "SELLER" | "MANAGER";
+  status: "ACTIVE" | "SUSPENDED";
   companyName: string | null;
-  createdAt: string;
+};
+
+export type ManagerAssetItem = {
+  id: string;
+  title: string;
+  status: "DRAFT" | "PUBLISHED" | "SUSPENDED";
+  askingPrice: number;
+  sellerCompany: string;
+  sellerEmail: string;
 };
 
 export type ManagerDashboardData = {
@@ -40,8 +51,8 @@ export type ManagerDashboardData = {
   sellerCount: number;
   publishedAssetCount: number;
   contactCount: number;
-  recentUsers: ManagerRecentUser[];
-  recentAssets: MarketplaceAsset[];
+  users: ManagerUserItem[];
+  managedAssets: ManagerAssetItem[];
   contactRequests: ContactRequestListItem[];
 };
 
@@ -65,10 +76,17 @@ export async function getBuyerDashboardData(input: {
     ...(interestFilters.length > 0 ? { OR: interestFilters } : {}),
   };
 
-  const [contactCount, recommendedCount, recommendedRows, sentRequests] =
-    await Promise.all([
+  const [
+    contactCount,
+    recommendedCount,
+    recommendedRows,
+    sentRequests,
+    incomingRequests,
+  ] = await Promise.all([
       prisma.contactRequest.count({
-        where: { senderId: input.userId },
+        where: {
+          OR: [{ senderId: input.userId }, { recipientId: input.userId }],
+        },
       }),
       prisma.asset.count({
         where: recommendedWhere,
@@ -79,6 +97,7 @@ export async function getBuyerDashboardData(input: {
         take: 4,
       }),
       getSentContactRequests(input.userId),
+      getIncomingContactRequests(input.userId),
     ]);
 
   return {
@@ -88,6 +107,7 @@ export async function getBuyerDashboardData(input: {
     recommendedCount,
     recommendedAssets: recommendedRows.map(mapAsset),
     sentRequests,
+    incomingRequests,
   };
 }
 
@@ -104,10 +124,18 @@ export async function getSellerDashboardData(input: {
       contactCount: 0,
       assets: [],
       incomingRequests: [],
+      sentRequests: [],
     };
   }
 
-  const [publishedCount, draftCount, contactCount, assetRows, incomingRequests] =
+  const [
+    publishedCount,
+    draftCount,
+    contactCount,
+    assetRows,
+    incomingRequests,
+    sentRequests,
+  ] =
     await Promise.all([
       prisma.asset.count({
         where: {
@@ -122,7 +150,9 @@ export async function getSellerDashboardData(input: {
         },
       }),
       prisma.contactRequest.count({
-        where: { recipientId: input.userId },
+        where: {
+          OR: [{ senderId: input.userId }, { recipientId: input.userId }],
+        },
       }),
       prisma.asset.findMany({
         where: { sellerId: input.sellerProfileId },
@@ -130,6 +160,7 @@ export async function getSellerDashboardData(input: {
         take: 8,
       }),
       getIncomingContactRequests(input.userId),
+      getSentContactRequests(input.userId),
     ]);
 
   return {
@@ -139,6 +170,7 @@ export async function getSellerDashboardData(input: {
     contactCount,
     assets: assetRows.map(mapAsset),
     incomingRequests,
+    sentRequests,
   };
 }
 
@@ -149,8 +181,8 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
     sellerCount,
     publishedAssetCount,
     contactCount,
-    recentUserRows,
-    recentAssetRows,
+    userRows,
+    assetRows,
     contactRequests,
   ] = await Promise.all([
     prisma.user.count(),
@@ -160,20 +192,27 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
     prisma.contactRequest.count(),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
-      take: 6,
       select: {
         id: true,
         email: true,
         role: true,
-        createdAt: true,
+        status: true,
         buyerProfile: { select: { companyName: true } },
         sellerProfile: { select: { companyName: true } },
       },
     }),
     prisma.asset.findMany({
-      where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
-      take: 4,
+      include: {
+        seller: {
+          select: {
+            companyName: true,
+            user: {
+              select: { email: true },
+            },
+          },
+        },
+      },
     }),
     getAllContactRequests(),
   ]);
@@ -184,15 +223,22 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
     sellerCount,
     publishedAssetCount,
     contactCount,
-    recentUsers: recentUserRows.map((user) => ({
+    users: userRows.map((user) => ({
       id: user.id,
       email: user.email,
       role: user.role,
+      status: user.status,
       companyName:
         user.buyerProfile?.companyName ?? user.sellerProfile?.companyName ?? null,
-      createdAt: user.createdAt.toISOString(),
     })),
-    recentAssets: recentAssetRows.map(mapAsset),
+    managedAssets: assetRows.map((asset) => ({
+      id: asset.id,
+      title: asset.title,
+      status: asset.status,
+      askingPrice: Number(asset.askingPrice),
+      sellerCompany: asset.seller.companyName,
+      sellerEmail: asset.seller.user.email,
+    })),
     contactRequests,
   };
 }

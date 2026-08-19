@@ -1,48 +1,58 @@
 import type { Metadata } from "next";
-import { Container } from "@/components/ui/container";
-import { SectionHeading } from "@/components/ui/section-heading";
-import { Card } from "@/components/ui/card";
+import { redirect } from "next/navigation";
+import { BuyersMarketplaceView } from "@/components/buyers/buyers-marketplace-view";
+import {
+  BUYER_MARKETPLACE_PAGE_SIZE,
+  buildBuyerMarketplaceHref,
+  parseBuyerMarketplaceSearchParams,
+} from "@/lib/buyer-marketplace";
+import { getBuyerMarketplacePageData } from "@/lib/buyers";
 
 export const metadata: Metadata = {
   title: "Покупці",
+  description:
+    "Перегляд інвестиційних профілів покупців на N5Deal Marketplace.",
 };
 
-const items = [
-  {
-    title: "Доступ до угод",
-    description:
-      "Переглядайте компанії та активи, відібрані для стратегічних і фінансових покупців.",
-  },
-  {
-    title: "Фільтри за критеріями",
-    description:
-      "Шукайте можливості за країною, галуззю, доходом і діапазоном інвестицій.",
-  },
-  {
-    title: "Прямий контакт",
-    description:
-      "Залишайте запити продавцям після попереднього перегляду ключових показників угоди.",
-  },
-];
+export default async function BuyersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const filters = parseBuyerMarketplaceSearchParams(params);
+  const result = await getBuyerMarketplacePageData(filters);
 
-export default function BuyersPage() {
+  if (result.ok && result.data.page !== filters.page) {
+    redirect(buildBuyerMarketplaceHref({ ...filters, page: result.data.page }));
+  }
+
+  if (!result.ok) {
+    return (
+      <BuyersMarketplaceView
+        buyers={[]}
+        total={0}
+        page={1}
+        pageSize={BUYER_MARKETPLACE_PAGE_SIZE}
+        totalPages={0}
+        filters={filters}
+        countries={[]}
+        industries={[]}
+        error={result.error}
+      />
+    );
+  }
+
   return (
-    <section className="py-12 sm:py-16">
-      <Container size="wide">
-        <SectionHeading
-          eyebrow="Для покупців"
-          title="Знаходьте бізнеси, готові до угоди"
-          description="N5Deal Marketplace допомагає інвесторам і стратегічним покупцям швидко оцінювати активи за прозорими фінансовими показниками."
-        />
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {items.map((item) => (
-            <Card key={item.title} className="p-6">
-              <h2 className="text-base font-semibold text-foreground">{item.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{item.description}</p>
-            </Card>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <BuyersMarketplaceView
+      buyers={result.data.buyers}
+      total={result.data.total}
+      page={result.data.page}
+      pageSize={result.data.pageSize}
+      totalPages={result.data.totalPages}
+      filters={{ ...filters, page: result.data.page }}
+      countries={result.data.countries}
+      industries={result.data.industries}
+    />
   );
 }

@@ -75,6 +75,7 @@ export function LoginForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@company.com"
+          disabled={pending}
           aria-invalid={Boolean(fieldErrors.email)}
           className={fieldErrors.email ? "border-red-400 focus:border-red-400" : undefined}
         />
@@ -92,13 +93,15 @@ export function LoginForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Введіть пароль"
+          disabled={pending}
           aria-invalid={Boolean(fieldErrors.password)}
           className={fieldErrors.password ? "border-red-400 focus:border-red-400" : undefined}
           action={
             <button
               type="button"
-              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted hover:bg-slate-50 hover:text-foreground"
+              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted hover:bg-slate-50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={showPassword ? "Приховати пароль" : "Показати пароль"}
+              disabled={pending}
               onClick={() => setShowPassword((value) => !value)}
             >
               {showPassword ? (

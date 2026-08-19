@@ -22,6 +22,11 @@ export type AssetContactContext =
   | { mode: "buyer"; hasPending: boolean }
   | { mode: "unavailable" };
 
+export type BuyerContactContext =
+  | { mode: "guest" }
+  | { mode: "seller"; hasPending: boolean }
+  | { mode: "unavailable" };
+
 export type CreateContactRequestResult =
   | { ok: true }
   | { ok: false; error: string };
@@ -41,23 +46,21 @@ export const contactStatusVariants: Record<
   DECLINED: "neutral",
 };
 
+const profileSelect = {
+  select: {
+    email: true,
+    buyerProfile: {
+      select: { companyName: true },
+    },
+    sellerProfile: {
+      select: { companyName: true },
+    },
+  },
+} as const;
+
 const listInclude = {
-  sender: {
-    select: {
-      email: true,
-      buyerProfile: {
-        select: { companyName: true },
-      },
-    },
-  },
-  recipient: {
-    select: {
-      email: true,
-      sellerProfile: {
-        select: { companyName: true },
-      },
-    },
-  },
+  sender: profileSelect,
+  recipient: profileSelect,
   asset: {
     select: {
       id: true,
@@ -66,24 +69,27 @@ const listInclude = {
   },
 } as const;
 
+type ContactParty = {
+  email: string;
+  buyerProfile: { companyName: string } | null;
+  sellerProfile: { companyName: string } | null;
+};
+
 type ContactRequestRow = {
   id: string;
   message: string;
   status: ContactRequestStatus;
   createdAt: Date;
   assetId: string | null;
-  sender: {
-    email: string;
-    buyerProfile: { companyName: string } | null;
-  };
-  recipient: {
-    email: string;
-    sellerProfile: { companyName: string } | null;
-  };
+  sender: ContactParty;
+  recipient: ContactParty;
   asset: { id: string; title: string } | null;
 };
 
 function mapContactRequest(row: ContactRequestRow): ContactRequestListItem {
+  const buyer = row.sender.buyerProfile ? row.sender : row.recipient;
+  const seller = row.sender.sellerProfile ? row.sender : row.recipient;
+
   return {
     id: row.id,
     message: row.message,
@@ -91,10 +97,10 @@ function mapContactRequest(row: ContactRequestRow): ContactRequestListItem {
     createdAt: row.createdAt.toISOString(),
     assetId: row.asset?.id ?? row.assetId,
     assetTitle: row.asset?.title ?? null,
-    buyerEmail: row.sender.email,
-    buyerCompany: row.sender.buyerProfile?.companyName ?? null,
-    sellerEmail: row.recipient.email,
-    sellerCompany: row.recipient.sellerProfile?.companyName ?? null,
+    buyerEmail: buyer.email,
+    buyerCompany: buyer.buyerProfile?.companyName ?? null,
+    sellerEmail: seller.email,
+    sellerCompany: seller.sellerProfile?.companyName ?? null,
   };
 }
 
@@ -186,6 +192,98 @@ export async function createBuyerContactRequest(input: {
       senderId: input.buyerId,
       recipientId: asset.seller.userId,
       assetId: asset.id,
+      message: input.message,
+      status: "PENDING",
+    },
+  });
+
+  return { ok: true };
+}
+
+export async function getBuyerContactContext(
+  buyerProfileId: string,
+): Promise<BuyerContactContext> {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return { mode: "guest" };
+  }
+
+  if (user.role !== "SELLER") {
+    return { mode: "unavailable" };
+  }
+
+  const buyer = await prisma.buyerProfile.findFirst({
+    where: {
+      id: buyerProfileId,
+      user: {
+        role: "BUYER",
+        status: "ACTIVE",
+      },
+    },
+    select: { userId: true },
+  });
+
+  if (!buyer || buyer.userId === user.id) {
+    return { mode: "unavailable" };
+  }
+
+  const pending = await prisma.contactRequest.findFirst({
+    where: {
+      senderId: user.id,
+      recipientId: buyer.userId,
+      status: "PENDING",
+    },
+    select: { id: true },
+  });
+
+  return {
+    mode: "seller",
+    hasPending: Boolean(pending),
+  };
+}
+
+export async function createSellerContactRequest(input: {
+  sellerId: string;
+  buyerProfileId: string;
+  message: string;
+}): Promise<CreateContactRequestResult> {
+  const buyer = await prisma.buyerProfile.findFirst({
+    where: {
+      id: input.buyerProfileId,
+      user: {
+        role: "BUYER",
+        status: "ACTIVE",
+      },
+    },
+    select: { userId: true },
+  });
+
+  if (!buyer) {
+    return { ok: false, error: "Покупця не знайдено або профіль недоступний." };
+  }
+
+  if (buyer.userId === input.sellerId) {
+    return { ok: false, error: "Ви не можете надіслати запит самому собі." };
+  }
+
+  const duplicate = await prisma.contactRequest.findFirst({
+    where: {
+      senderId: input.sellerId,
+      recipientId: buyer.userId,
+      status: "PENDING",
+    },
+    select: { id: true },
+  });
+
+  if (duplicate) {
+    return { ok: false, error: "Запит цьому покупцю вже надіслано." };
+  }
+
+  await prisma.contactRequest.create({
+    data: {
+      senderId: input.sellerId,
+      recipientId: buyer.userId,
       message: input.message,
       status: "PENDING",
     },

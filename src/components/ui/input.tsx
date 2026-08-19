@@ -35,7 +35,7 @@ export function Input({
         <input
           id={inputId}
           className={cn(
-            "h-11 w-full rounded-lg bg-surface text-sm text-foreground outline-none placeholder:text-muted/80",
+            "h-11 w-full min-w-0 rounded-lg bg-surface text-sm text-foreground outline-none placeholder:text-muted/80 disabled:cursor-not-allowed disabled:opacity-60",
             variant === "default" &&
               "border border-border shadow-sm transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20",
             variant === "plain" && "border-0 shadow-none focus:ring-0",

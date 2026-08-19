@@ -14,6 +14,7 @@ type ContactRequestListProps = {
   variant: "buyer" | "seller" | "manager";
   emptyTitle: string;
   emptyDescription: string;
+  showActions?: boolean;
 };
 
 export function ContactRequestList({
@@ -21,6 +22,7 @@ export function ContactRequestList({
   variant,
   emptyTitle,
   emptyDescription,
+  showActions = variant === "seller",
 }: ContactRequestListProps) {
   if (requests.length === 0) {
     return (
@@ -40,13 +42,16 @@ export function ContactRequestList({
               {request.assetId && request.assetTitle ? (
                 <Link
                   href={`/assets/${request.assetId}`}
-                  className="text-base font-semibold tracking-tight text-foreground transition-colors hover:text-primary"
+                  className="text-base font-semibold tracking-tight break-words text-foreground transition-colors hover:text-primary"
                 >
                   {request.assetTitle}
                 </Link>
               ) : (
-                <p className="text-base font-semibold tracking-tight text-foreground">
-                  {request.assetTitle ?? "Актив недоступний"}
+                <p className="text-base font-semibold tracking-tight break-words text-foreground">
+                  {request.assetTitle ??
+                    (variant === "buyer"
+                      ? (request.sellerCompany ?? request.sellerEmail)
+                      : (request.buyerCompany ?? request.buyerEmail))}
                 </p>
               )}
               <p className="mt-1 text-sm text-muted">
@@ -64,11 +69,11 @@ export function ContactRequestList({
                 <dt className="text-[11px] font-medium tracking-wide text-muted uppercase">
                   Покупець
                 </dt>
-                <dd className="mt-1 text-sm font-medium text-foreground">
+                <dd className="mt-1 text-sm font-medium break-words text-foreground">
                   {request.buyerCompany ?? request.buyerEmail}
                 </dd>
                 {request.buyerCompany ? (
-                  <dd className="text-sm text-muted">{request.buyerEmail}</dd>
+                  <dd className="text-sm break-all text-muted">{request.buyerEmail}</dd>
                 ) : null}
               </div>
             ) : null}
@@ -77,11 +82,11 @@ export function ContactRequestList({
                 <dt className="text-[11px] font-medium tracking-wide text-muted uppercase">
                   Продавець
                 </dt>
-                <dd className="mt-1 text-sm font-medium text-foreground">
+                <dd className="mt-1 text-sm font-medium break-words text-foreground">
                   {request.sellerCompany ?? request.sellerEmail}
                 </dd>
                 {variant === "manager" && request.sellerCompany ? (
-                  <dd className="text-sm text-muted">{request.sellerEmail}</dd>
+                  <dd className="text-sm break-all text-muted">{request.sellerEmail}</dd>
                 ) : null}
               </div>
             ) : null}
@@ -91,12 +96,12 @@ export function ContactRequestList({
             <p className="text-[11px] font-medium tracking-wide text-muted uppercase">
               Повідомлення
             </p>
-            <p className="mt-1 text-sm leading-6 text-foreground">
+            <p className="mt-1 text-sm leading-6 break-words text-foreground">
               {request.message}
             </p>
           </div>
 
-          {variant === "seller" && request.status === "PENDING" ? (
+          {showActions && request.status === "PENDING" ? (
             <div className="mt-4 border-t border-border pt-4">
               <ContactRequestActions requestId={request.id} />
             </div>

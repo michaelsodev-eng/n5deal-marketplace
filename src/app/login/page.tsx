@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,6 +26,15 @@ export default function LoginPage() {
             запитів і панелі керування.
           </p>
           <LoginForm />
+          <p className="mt-4 text-center text-sm text-muted">
+            Немає акаунта?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-primary hover:text-primary-hover"
+            >
+              Зареєструватися
+            </Link>
+          </p>
           <div className="mt-6 border-t border-border pt-4">
             <Button href="/assets" variant="ghost" className="w-full">
               До торговельного майданчика

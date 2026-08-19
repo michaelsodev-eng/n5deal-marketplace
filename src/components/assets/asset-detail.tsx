@@ -75,26 +75,26 @@ export function AssetDetail({ asset, contact }: AssetDetailProps) {
                 </div>
               </div>
 
-              <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-4 text-2xl font-semibold tracking-tight break-words text-foreground sm:text-3xl">
                 {asset.title}
               </h1>
 
-              <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-slate-50/80 sm:grid-cols-4">
+              <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-slate-50/80 md:grid-cols-4">
                 {metrics.map((metric, index) => (
                   <div
                     key={metric.label}
                     className={cn(
-                      "px-3 py-3",
+                      "min-w-0 px-3 py-3",
                       index % 2 === 1 && "border-l border-border",
                       index >= 2 && "border-t border-border",
-                      index > 0 && "sm:border-l",
-                      "sm:border-t-0",
+                      index > 0 && "md:border-l",
+                      "md:border-t-0",
                     )}
                   >
                     <dt className="text-[11px] font-medium tracking-wide text-muted uppercase">
                       {metric.label}
                     </dt>
-                    <dd className="mt-1 text-sm font-semibold text-foreground">
+                    <dd className="mt-1 text-sm font-semibold break-words text-foreground">
                       {metric.value}
                     </dd>
                   </div>
@@ -109,7 +109,7 @@ export function AssetDetail({ asset, contact }: AssetDetailProps) {
 
               <div className="mt-6">
                 <h2 className="text-sm font-semibold text-foreground">Опис</h2>
-                <p className="mt-2 text-sm leading-7 text-muted">
+                <p className="mt-2 text-sm leading-7 break-words text-muted">
                   {asset.description}
                 </p>
               </div>
@@ -124,8 +124,8 @@ export function AssetDetail({ asset, contact }: AssetDetailProps) {
                       key={fact.label}
                       className="flex items-start justify-between gap-4 px-4 py-3"
                     >
-                      <dt className="text-sm text-muted">{fact.label}</dt>
-                      <dd className="text-sm font-medium text-foreground">
+                      <dt className="shrink-0 text-sm text-muted">{fact.label}</dt>
+                      <dd className="min-w-0 text-right text-sm font-medium break-words text-foreground">
                         {fact.value}
                       </dd>
                     </div>
@@ -167,7 +167,7 @@ export function AssetDetail({ asset, contact }: AssetDetailProps) {
             </Card>
           </div>
 
-          <div className="xl:block">
+          <div className="hidden xl:block">
             <MarketInsights />
           </div>
         </div>

@@ -216,6 +216,16 @@ export const getPublishedAssetById = cache(
   },
 );
 
+export async function getFeaturedPublishedAssets(limit = 4) {
+  const rows = await prisma.asset.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return rows.map(mapAsset);
+}
+
 export async function getMarketplacePageData(
   filters: MarketplaceFilterState,
 ): Promise<MarketplacePageResult> {

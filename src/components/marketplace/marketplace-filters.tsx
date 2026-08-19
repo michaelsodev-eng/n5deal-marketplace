@@ -32,6 +32,7 @@ export function MarketplaceFilters({
 }: MarketplaceFiltersProps) {
   return (
     <aside
+      id="marketplace-filters"
       className={cn(
         "rounded-xl border border-border bg-surface p-4 shadow-card xl:sticky xl:top-20 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto",
         className,

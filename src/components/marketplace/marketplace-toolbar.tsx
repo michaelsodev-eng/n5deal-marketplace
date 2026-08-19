@@ -16,6 +16,10 @@ type MarketplaceToolbarProps = {
   onCategoryChange: (value: string) => void;
   onSortChange: (value: SortKey) => void;
   onToggleFilters: () => void;
+  resultLabel?: (count: number) => string;
+  showCategories?: boolean;
+  showSort?: boolean;
+  filtersId?: string;
 };
 
 export function MarketplaceToolbar({
@@ -28,19 +32,27 @@ export function MarketplaceToolbar({
   onCategoryChange,
   onSortChange,
   onToggleFilters,
+  resultLabel = pluralizeAssets,
+  showCategories = true,
+  showSort = true,
+  filtersId = "marketplace-filters",
 }: MarketplaceToolbarProps) {
   return (
     <div className="mt-6 space-y-4">
-      <CategoryTabs
-        categories={categories}
-        value={category}
-        onChange={onCategoryChange}
-      />
+      {showCategories ? (
+        <CategoryTabs
+          categories={categories}
+          value={category}
+          onChange={onCategoryChange}
+        />
+      ) : null}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button
             variant="outline"
             className="xl:hidden"
+            aria-expanded={filtersOpen}
+            aria-controls={filtersId}
             onClick={onToggleFilters}
           >
             {filtersOpen ? "Сховати фільтри" : "Фільтри"}
@@ -49,18 +61,20 @@ export function MarketplaceToolbar({
           <p className="text-sm text-muted">
             Знайдено{" "}
             <span className="font-semibold text-foreground">{resultCount}</span>{" "}
-            {pluralizeAssets(resultCount)}
+            {resultLabel(resultCount)}
           </p>
         </div>
-        <div className="w-full sm:max-w-[240px] lg:ml-auto">
-          <Select
-            name="sort"
-            aria-label="Сортування"
-            value={sort}
-            onChange={(event) => onSortChange(event.target.value as SortKey)}
-            options={sortOptions}
-          />
-        </div>
+        {showSort ? (
+          <div className="w-full sm:max-w-[240px] lg:ml-auto">
+            <Select
+              name="sort"
+              aria-label="Сортування"
+              value={sort}
+              onChange={(event) => onSortChange(event.target.value as SortKey)}
+              options={sortOptions}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

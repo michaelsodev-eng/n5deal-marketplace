@@ -30,7 +30,7 @@ export function Select({
       <select
         id={selectId}
         className={cn(
-          "h-11 w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface bg-[length:16px] bg-[right_12px_center] bg-no-repeat px-3 pr-10 text-sm text-foreground shadow-sm outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20",
+          "h-11 w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-border bg-surface bg-[length:16px] bg-[right_12px_center] bg-no-repeat px-3 pr-10 text-sm text-foreground shadow-sm outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-60",
           className,
         )}
         style={{

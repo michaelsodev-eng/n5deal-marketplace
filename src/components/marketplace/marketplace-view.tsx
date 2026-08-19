@@ -100,7 +100,10 @@ export function MarketplaceView({
           />
           <div className="min-w-0 space-y-4">
             {error ? (
-              <div className="rounded-xl border border-border bg-surface px-6 py-16 text-center shadow-card">
+              <div
+                role="alert"
+                className="rounded-xl border border-red-200 bg-red-50 px-6 py-16 text-center"
+              >
                 <p className="text-base font-medium text-foreground">
                   Пропозиції недоступні
                 </p>
@@ -114,12 +117,14 @@ export function MarketplaceView({
                   totalPages={totalPages}
                   pageSize={pageSize}
                   total={total}
-                  filters={filters}
+                  getPageHref={(nextPage) =>
+                    buildMarketplaceHref({ ...filters, page: nextPage })
+                  }
                 />
               </>
             )}
           </div>
-          <div className="xl:block">
+          <div className="hidden xl:block">
             <MarketInsights />
           </div>
         </div>

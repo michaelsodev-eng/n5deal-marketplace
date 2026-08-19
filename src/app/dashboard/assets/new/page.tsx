@@ -24,7 +24,7 @@ export default async function NewAssetPage() {
         <p className="mt-6 text-sm font-medium tracking-wide text-primary">
           Кабінет продавця
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight break-words text-foreground sm:text-3xl">
           Створити актив
         </h1>
         <p className="mt-2 text-sm leading-6 text-muted">

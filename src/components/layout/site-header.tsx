@@ -27,16 +27,20 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const cabinetActive =
-    pathname === "/dashboard" || pathname === "/manager";
+    pathname.startsWith("/dashboard") || pathname.startsWith("/manager");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
       <Container size="wide" className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex cursor-pointer items-center gap-2.5" onClick={() => setOpen(false)}>
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-[11px] font-semibold tracking-tight text-white">
+        <Link
+          href="/"
+          className="flex min-w-0 cursor-pointer items-center gap-2.5"
+          onClick={() => setOpen(false)}
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-[11px] font-semibold tracking-tight text-white">
             N5
           </span>
-          <span className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
+          <span className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
             N5Deal Marketplace
           </span>
         </Link>
@@ -74,15 +78,16 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
               <Button href="/login" variant="ghost">
                 Вхід
               </Button>
-              <Button>Почати</Button>
+              <Button href="/register">Почати</Button>
             </>
           )}
         </div>
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-foreground hover:bg-slate-50 lg:hidden"
+          className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground hover:bg-slate-50 lg:hidden"
           aria-expanded={open}
+          aria-controls="site-mobile-nav"
           aria-label={open ? "Закрити меню" : "Відкрити меню"}
           onClick={() => setOpen((value) => !value)}
         >
@@ -109,7 +114,10 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
       </Container>
 
       {open ? (
-        <div className="border-t border-border bg-surface lg:hidden">
+        <div
+          id="site-mobile-nav"
+          className="border-t border-border bg-surface lg:hidden"
+        >
           <Container size="wide" className="flex flex-col gap-1 py-4">
             {navigation.map((item) => (
               <Link
@@ -128,7 +136,7 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
             ))}
             {session ? (
               <div className="mt-3 space-y-2">
-                <p className="px-3 text-sm text-muted">{session.label}</p>
+                <p className="truncate px-3 text-sm text-muted">{session.label}</p>
                 <Button
                   href={session.href}
                   className="w-full"
@@ -139,10 +147,16 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
               </div>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <Button href="/login" variant="outline">
+                <Button
+                  href="/login"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                >
                   Вхід
                 </Button>
-                <Button>Почати</Button>
+                <Button href="/register" onClick={() => setOpen(false)}>
+                  Почати
+                </Button>
               </div>
             )}
           </Container>

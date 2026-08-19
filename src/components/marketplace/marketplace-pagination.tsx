@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import {
-  buildMarketplaceHref,
-  type MarketplaceFilterState,
-} from "@/lib/marketplace";
 
 type MarketplacePaginationProps = {
   page: number;
   totalPages: number;
   pageSize: number;
   total: number;
-  filters: MarketplaceFilterState;
+  getPageHref: (page: number) => string;
 };
 
 function visiblePages(current: number, total: number): number[] {
@@ -30,7 +26,7 @@ export function MarketplacePagination({
   totalPages,
   pageSize,
   total,
-  filters,
+  getPageHref,
 }: MarketplacePaginationProps) {
   if (totalPages <= 1) {
     return null;
@@ -50,8 +46,9 @@ export function MarketplacePagination({
       </p>
       <div className="flex flex-wrap items-center gap-1.5">
         <Link
-          href={buildMarketplaceHref({ ...filters, page: Math.max(1, page - 1) })}
+          href={getPageHref(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
+          tabIndex={page <= 1 ? -1 : undefined}
           className={cn(
             "inline-flex h-9 items-center rounded-lg border border-border px-3 text-sm font-medium",
             page <= 1
@@ -71,7 +68,7 @@ export function MarketplacePagination({
                 <span className="px-1 text-sm text-muted">…</span>
               ) : null}
               <Link
-                href={buildMarketplaceHref({ ...filters, page: item })}
+                href={getPageHref(item)}
                 aria-current={item === page ? "page" : undefined}
                 className={cn(
                   "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2.5 text-sm font-medium",
@@ -86,11 +83,9 @@ export function MarketplacePagination({
           );
         })}
         <Link
-          href={buildMarketplaceHref({
-            ...filters,
-            page: Math.min(totalPages, page + 1),
-          })}
+          href={getPageHref(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
+          tabIndex={page >= totalPages ? -1 : undefined}
           className={cn(
             "inline-flex h-9 items-center rounded-lg border border-border px-3 text-sm font-medium",
             page >= totalPages
