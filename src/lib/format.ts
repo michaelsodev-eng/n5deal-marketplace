@@ -17,3 +17,36 @@ export function formatNumber(value: number | null): string {
 
   return new Intl.NumberFormat("uk-UA").format(value);
 }
+
+export function formatCompactMoney(value: number | null): string {
+  if (value == null) {
+    return "—";
+  }
+
+  if (value >= 1_000_000) {
+    const millions = value / 1_000_000;
+    const formatted = new Intl.NumberFormat("uk-UA", {
+      minimumFractionDigits: Number.isInteger(millions) ? 0 : 1,
+      maximumFractionDigits: 1,
+    }).format(millions);
+
+    return `€${formatted} млн`;
+  }
+
+  return formatMoney(value);
+}
+
+export function pluralizeAssets(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return "пропозиція";
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return "пропозиції";
+  }
+
+  return "пропозицій";
+}

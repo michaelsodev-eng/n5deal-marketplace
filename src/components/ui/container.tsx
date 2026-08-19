@@ -4,13 +4,14 @@ import { cn } from "@/lib/cn";
 type ContainerProps = {
   children: ReactNode;
   className?: string;
-  size?: "default" | "wide" | "narrow";
+  size?: "default" | "wide" | "narrow" | "full";
 };
 
 const sizes = {
   narrow: "max-w-3xl",
   default: "max-w-6xl",
   wide: "max-w-7xl",
+  full: "max-w-[1400px]",
 };
 
 export function Container({

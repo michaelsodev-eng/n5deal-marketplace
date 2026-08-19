@@ -3,79 +3,114 @@
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/cn";
+import {
+  ebitdaRangeOptions,
+  employeeRangeOptions,
+  priceRangeOptions,
+  revenueRangeOptions,
+  type MarketplaceFilterState,
+} from "@/lib/marketplace";
 
 type MarketplaceFiltersProps = {
-  country: string;
-  industry: string;
-  price: string;
+  filters: MarketplaceFilterState;
   countries: string[];
   industries: string[];
-  onCountryChange: (value: string) => void;
-  onIndustryChange: (value: string) => void;
-  onPriceChange: (value: string) => void;
+  assetTypes: string[];
+  onChange: (patch: Partial<MarketplaceFilterState>) => void;
   onReset: () => void;
   className?: string;
 };
 
-const priceOptions = [
-  { value: "any", label: "Будь-яка ціна" },
-  { value: "0-2000000", label: "До €2 млн" },
-  { value: "2000000-4000000", label: "€2–4 млн" },
-  { value: "4000000-999999999", label: "Понад €4 млн" },
-];
-
 export function MarketplaceFilters({
-  country,
-  industry,
-  price,
+  filters,
   countries,
   industries,
-  onCountryChange,
-  onIndustryChange,
-  onPriceChange,
+  assetTypes,
+  onChange,
   onReset,
   className,
 }: MarketplaceFiltersProps) {
   return (
     <aside
       className={cn(
-        "rounded-xl border border-border bg-surface p-4 shadow-card",
+        "rounded-xl border border-border bg-surface p-4 shadow-card xl:sticky xl:top-20 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto",
         className,
       )}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Фільтри</h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Фільтри</h2>
+          <p className="mt-0.5 text-xs text-muted">Уточніть вибірку угод</p>
+        </div>
         <Button variant="ghost" size="sm" onClick={onReset}>
-          Скинути
+          Очистити
         </Button>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         <Select
           label="Країна"
           name="country"
-          value={country}
-          onChange={(event) => onCountryChange(event.target.value)}
+          value={filters.country}
+          onChange={(event) => onChange({ country: event.target.value })}
           options={[
             { value: "all", label: "Усі країни" },
             ...countries.map((item) => ({ value: item, label: item })),
           ]}
+          className="h-10"
         />
         <Select
           label="Галузь"
           name="industry"
-          value={industry}
-          onChange={(event) => onIndustryChange(event.target.value)}
+          value={filters.industry}
+          onChange={(event) => onChange({ industry: event.target.value })}
           options={[
             { value: "all", label: "Усі галузі" },
             ...industries.map((item) => ({ value: item, label: item })),
           ]}
+          className="h-10"
         />
         <Select
-          label="Ціна пропозиції"
+          label="Тип активу"
+          name="assetType"
+          value={filters.assetType}
+          onChange={(event) => onChange({ assetType: event.target.value })}
+          options={[
+            { value: "all", label: "Усі типи" },
+            ...assetTypes.map((item) => ({ value: item, label: item })),
+          ]}
+          className="h-10"
+        />
+        <Select
+          label="Діапазон цін запиту"
           name="price"
-          value={price}
-          onChange={(event) => onPriceChange(event.target.value)}
-          options={priceOptions}
+          value={filters.price}
+          onChange={(event) => onChange({ price: event.target.value })}
+          options={priceRangeOptions}
+          className="h-10"
+        />
+        <Select
+          label="Діапазон доходу"
+          name="revenue"
+          value={filters.revenue}
+          onChange={(event) => onChange({ revenue: event.target.value })}
+          options={revenueRangeOptions}
+          className="h-10"
+        />
+        <Select
+          label="Діапазон EBITDA"
+          name="ebitda"
+          value={filters.ebitda}
+          onChange={(event) => onChange({ ebitda: event.target.value })}
+          options={ebitdaRangeOptions}
+          className="h-10"
+        />
+        <Select
+          label="Співробітники"
+          name="employees"
+          value={filters.employees}
+          onChange={(event) => onChange({ employees: event.target.value })}
+          options={employeeRangeOptions}
+          className="h-10"
         />
       </div>
     </aside>
