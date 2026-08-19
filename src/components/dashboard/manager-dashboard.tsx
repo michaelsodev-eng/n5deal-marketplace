@@ -1,5 +1,6 @@
 import { AssetCard } from "@/components/assets/asset-card";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { ContactRequestList } from "@/components/dashboard/contact-request-list";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -98,6 +99,18 @@ export function ManagerDashboard({ data }: ManagerDashboardProps) {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Запити на контакт
+          </h2>
+          <ContactRequestList
+            requests={data.contactRequests}
+            variant="manager"
+            emptyTitle="Запитів на контакт ще немає"
+            emptyDescription="Усі запити покупців до продавців з’являться в цьому списку."
+          />
         </div>
       </Container>
     </section>

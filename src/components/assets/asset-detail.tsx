@@ -1,10 +1,12 @@
 import { CountryMark } from "@/components/assets/country-mark";
+import { ContactSellerForm } from "@/components/assets/contact-seller-form";
 import { MarketInsights } from "@/components/marketplace/market-insights";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
+import type { AssetContactContext } from "@/lib/contact-requests";
 import type { MarketplaceAsset } from "@/lib/marketplace";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -26,9 +28,10 @@ const statusVariants: Record<
 
 type AssetDetailProps = {
   asset: MarketplaceAsset;
+  contact: AssetContactContext;
 };
 
-export function AssetDetail({ asset }: AssetDetailProps) {
+export function AssetDetail({ asset, contact }: AssetDetailProps) {
   const metrics = [
     { label: "Ціна пропозиції", value: formatMoney(asset.askingPrice) },
     { label: "Дохід", value: formatMoney(asset.revenue) },
@@ -130,11 +133,36 @@ export function AssetDetail({ asset }: AssetDetailProps) {
                 </dl>
               </div>
 
-              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                <Button className="sm:flex-1">Зв’язатися з продавцем</Button>
-                <Button href="/assets" variant="outline" className="sm:flex-1">
-                  Назад на торговельний майданчик
-                </Button>
+              <div className="mt-6 space-y-3">
+                {contact.mode === "guest" ? (
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button href="/login" className="sm:flex-1">
+                      Зв’язатися з продавцем
+                    </Button>
+                    <Button href="/assets" variant="outline" className="sm:flex-1">
+                      Назад на торговельний майданчик
+                    </Button>
+                  </div>
+                ) : null}
+
+                {contact.mode === "buyer" && contact.hasPending ? (
+                  <div
+                    role="status"
+                    className="rounded-lg border border-success/20 bg-success-soft px-3 py-2.5 text-sm text-success"
+                  >
+                    Запит надіслано продавцю.
+                  </div>
+                ) : null}
+
+                {contact.mode === "buyer" && !contact.hasPending ? (
+                  <ContactSellerForm assetId={asset.id} />
+                ) : null}
+
+                {contact.mode !== "guest" ? (
+                  <Button href="/assets" variant="outline" className="w-full sm:w-auto">
+                    Назад на торговельний майданчик
+                  </Button>
+                ) : null}
               </div>
             </Card>
           </div>

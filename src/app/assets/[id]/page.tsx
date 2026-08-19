@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AssetDetail } from "@/components/assets/asset-detail";
 import { getPublishedAssetById } from "@/lib/assets";
+import { getAssetContactContext } from "@/lib/contact-requests";
 
 export async function generateMetadata({
   params,
@@ -35,5 +36,7 @@ export default async function AssetDetailPage({
     notFound();
   }
 
-  return <AssetDetail asset={asset} />;
+  const contact = await getAssetContactContext(id);
+
+  return <AssetDetail asset={asset} contact={contact} />;
 }

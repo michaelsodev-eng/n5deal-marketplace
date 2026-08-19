@@ -1,5 +1,6 @@
 import { AssetCard } from "@/components/assets/asset-card";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { ContactRequestList } from "@/components/dashboard/contact-request-list";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -65,6 +66,18 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
               </Button>
             </div>
           )}
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Вхідні запити
+          </h2>
+          <ContactRequestList
+            requests={data.incomingRequests}
+            variant="seller"
+            emptyTitle="Вхідних запитів ще немає"
+            emptyDescription="Коли покупець надішле запит щодо вашого активу, він з’явиться тут."
+          />
         </div>
       </Container>
     </section>

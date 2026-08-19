@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { mapAsset } from "@/lib/assets";
+import {
+  getAllContactRequests,
+  getIncomingContactRequests,
+  getSentContactRequests,
+  type ContactRequestListItem,
+} from "@/lib/contact-requests";
 import type { MarketplaceAsset } from "@/lib/marketplace";
 
 export type BuyerDashboardData = {
@@ -8,6 +14,7 @@ export type BuyerDashboardData = {
   contactCount: number;
   recommendedCount: number;
   recommendedAssets: MarketplaceAsset[];
+  sentRequests: ContactRequestListItem[];
 };
 
 export type SellerDashboardData = {
@@ -16,6 +23,7 @@ export type SellerDashboardData = {
   draftCount: number;
   contactCount: number;
   assets: MarketplaceAsset[];
+  incomingRequests: ContactRequestListItem[];
 };
 
 export type ManagerRecentUser = {
@@ -34,6 +42,7 @@ export type ManagerDashboardData = {
   contactCount: number;
   recentUsers: ManagerRecentUser[];
   recentAssets: MarketplaceAsset[];
+  contactRequests: ContactRequestListItem[];
 };
 
 export async function getBuyerDashboardData(input: {
@@ -56,19 +65,21 @@ export async function getBuyerDashboardData(input: {
     ...(interestFilters.length > 0 ? { OR: interestFilters } : {}),
   };
 
-  const [contactCount, recommendedCount, recommendedRows] = await Promise.all([
-    prisma.contactRequest.count({
-      where: { senderId: input.userId },
-    }),
-    prisma.asset.count({
-      where: recommendedWhere,
-    }),
-    prisma.asset.findMany({
-      where: recommendedWhere,
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
-  ]);
+  const [contactCount, recommendedCount, recommendedRows, sentRequests] =
+    await Promise.all([
+      prisma.contactRequest.count({
+        where: { senderId: input.userId },
+      }),
+      prisma.asset.count({
+        where: recommendedWhere,
+      }),
+      prisma.asset.findMany({
+        where: recommendedWhere,
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      }),
+      getSentContactRequests(input.userId),
+    ]);
 
   return {
     companyName: input.companyName,
@@ -76,6 +87,7 @@ export async function getBuyerDashboardData(input: {
     contactCount,
     recommendedCount,
     recommendedAssets: recommendedRows.map(mapAsset),
+    sentRequests,
   };
 }
 
@@ -91,10 +103,11 @@ export async function getSellerDashboardData(input: {
       draftCount: 0,
       contactCount: 0,
       assets: [],
+      incomingRequests: [],
     };
   }
 
-  const [publishedCount, draftCount, contactCount, assetRows] =
+  const [publishedCount, draftCount, contactCount, assetRows, incomingRequests] =
     await Promise.all([
       prisma.asset.count({
         where: {
@@ -116,6 +129,7 @@ export async function getSellerDashboardData(input: {
         orderBy: { createdAt: "desc" },
         take: 8,
       }),
+      getIncomingContactRequests(input.userId),
     ]);
 
   return {
@@ -124,6 +138,7 @@ export async function getSellerDashboardData(input: {
     draftCount,
     contactCount,
     assets: assetRows.map(mapAsset),
+    incomingRequests,
   };
 }
 
@@ -136,6 +151,7 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
     contactCount,
     recentUserRows,
     recentAssetRows,
+    contactRequests,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { role: "BUYER" } }),
@@ -159,6 +175,7 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
+    getAllContactRequests(),
   ]);
 
   return {
@@ -176,5 +193,6 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
       createdAt: user.createdAt.toISOString(),
     })),
     recentAssets: recentAssetRows.map(mapAsset),
+    contactRequests,
   };
 }
