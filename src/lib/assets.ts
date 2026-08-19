@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { Asset, Prisma } from "@/generated/prisma/client";
+import type { ParsedAssetInput } from "@/lib/asset-form";
 import { prisma } from "@/lib/prisma";
 import {
   MARKETPLACE_PAGE_SIZE,
@@ -124,6 +125,78 @@ function buildOrderBy(
   }
 
   return { createdAt: "desc" };
+}
+
+export const getSellerOwnedAsset = cache(
+  async (
+    id: string,
+    sellerProfileId: string,
+  ): Promise<MarketplaceAsset | null> => {
+    const asset = await prisma.asset.findFirst({
+      where: {
+        id,
+        sellerId: sellerProfileId,
+      },
+    });
+
+    if (!asset) {
+      return null;
+    }
+
+    return mapAsset(asset);
+  },
+);
+
+export async function createSellerAsset(
+  sellerProfileId: string,
+  data: ParsedAssetInput,
+  status: "DRAFT" | "PUBLISHED",
+) {
+  const asset = await prisma.asset.create({
+    data: {
+      sellerId: sellerProfileId,
+      title: data.title,
+      description: data.description,
+      assetType: data.assetType,
+      industry: data.industry,
+      country: data.country,
+      askingPrice: data.askingPrice,
+      revenue: data.revenue,
+      ebitda: data.ebitda,
+      employees: data.employees,
+      status,
+    },
+  });
+
+  return mapAsset(asset);
+}
+
+export async function updateSellerAsset(
+  id: string,
+  sellerProfileId: string,
+  data: ParsedAssetInput,
+  status: "DRAFT" | "PUBLISHED",
+) {
+  const result = await prisma.asset.updateMany({
+    where: {
+      id,
+      sellerId: sellerProfileId,
+    },
+    data: {
+      title: data.title,
+      description: data.description,
+      assetType: data.assetType,
+      industry: data.industry,
+      country: data.country,
+      askingPrice: data.askingPrice,
+      revenue: data.revenue,
+      ebitda: data.ebitda,
+      employees: data.employees,
+      status,
+    },
+  });
+
+  return result.count;
 }
 
 export const getPublishedAssetById = cache(

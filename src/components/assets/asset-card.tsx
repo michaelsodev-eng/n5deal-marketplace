@@ -23,9 +23,10 @@ const statusVariants: Record<
 
 type AssetCardProps = {
   asset: MarketplaceAsset;
+  editHref?: string;
 };
 
-export function AssetCard({ asset }: AssetCardProps) {
+export function AssetCard({ asset, editHref }: AssetCardProps) {
   const metrics = [
     { label: "Ціна пропозиції", value: formatCompactMoney(asset.askingPrice) },
     { label: "Дохід", value: formatCompactMoney(asset.revenue) },
@@ -105,12 +106,31 @@ export function AssetCard({ asset }: AssetCardProps) {
         ) : null}
 
         <div className="mt-5 flex flex-col gap-2 sm:mt-auto sm:flex-row">
-          <Button href={`/assets/${asset.id}`} variant="primary" className="sm:flex-1">
-            Переглянути деталі
-          </Button>
-          <Button variant="outline" className="sm:flex-1">
-            Зв’язатися з продавцем
-          </Button>
+          {editHref ? (
+            <>
+              <Button href={editHref} variant="primary" className="sm:flex-1">
+                Редагувати
+              </Button>
+              {asset.status === "PUBLISHED" ? (
+                <Button
+                  href={`/assets/${asset.id}`}
+                  variant="outline"
+                  className="sm:flex-1"
+                >
+                  Переглянути деталі
+                </Button>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <Button href={`/assets/${asset.id}`} variant="primary" className="sm:flex-1">
+                Переглянути деталі
+              </Button>
+              <Button variant="outline" className="sm:flex-1">
+                Зв’язатися з продавцем
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Card>

@@ -27,9 +27,7 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button type="button" disabled>
-              Створити актив
-            </Button>
+            <Button href="/dashboard/assets/new">Створити актив</Button>
             <LogoutButton />
           </div>
         </div>
@@ -47,7 +45,11 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
           {data.assets.length > 0 ? (
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {data.assets.map((asset) => (
-                <AssetCard key={asset.id} asset={asset} />
+                <AssetCard
+                  key={asset.id}
+                  asset={asset}
+                  editHref={`/dashboard/assets/${asset.id}/edit`}
+                />
               ))}
             </div>
           ) : (
@@ -56,8 +58,11 @@ export function SellerDashboard({ data }: SellerDashboardProps) {
                 Активів ще немає
               </p>
               <p className="mt-2 text-sm text-muted">
-                Створення активів буде доступне на наступному кроці.
+                Створіть першу пропозицію, щоб вона з’явилася в кабінеті.
               </p>
+              <Button href="/dashboard/assets/new" className="mt-4">
+                Створити актив
+              </Button>
             </div>
           )}
         </div>
