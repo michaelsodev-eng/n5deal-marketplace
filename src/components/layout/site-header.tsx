@@ -46,7 +46,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button variant="ghost">Вхід</Button>
+          <Button href="/login" variant="ghost">
+            Вхід
+          </Button>
           <Button>Почати</Button>
         </div>
 
@@ -98,7 +100,9 @@ export function SiteHeader() {
               </Link>
             ))}
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <Button variant="outline">Вхід</Button>
+              <Button href="/login" variant="outline">
+                Вхід
+              </Button>
               <Button>Почати</Button>
             </div>
           </Container>

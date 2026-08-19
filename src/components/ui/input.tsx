@@ -4,12 +4,14 @@ import { cn } from "@/lib/cn";
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   icon?: ReactNode;
+  action?: ReactNode;
   variant?: "default" | "plain";
 };
 
 export function Input({
   label,
   icon,
+  action,
   variant = "default",
   className,
   id,
@@ -37,11 +39,17 @@ export function Input({
             variant === "default" &&
               "border border-border shadow-sm transition-shadow focus:border-primary focus:ring-2 focus:ring-ring/20",
             variant === "plain" && "border-0 shadow-none focus:ring-0",
-            icon ? "pl-10 pr-3" : "px-3",
+            icon ? "pl-10" : "pl-3",
+            action ? "pr-11" : "pr-3",
             className,
           )}
           {...props}
         />
+        {action ? (
+          <span className="absolute inset-y-0 right-1.5 flex items-center">
+            {action}
+          </span>
+        ) : null}
       </span>
     </label>
   );
