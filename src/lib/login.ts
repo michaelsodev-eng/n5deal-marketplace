@@ -64,3 +64,9 @@ export async function loginWithCredentials(
     return { ok: false, error: "Не вдалося увійти. Спробуйте пізніше." };
   }
 }
+
+export async function logoutCurrentUser(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+  });
+}

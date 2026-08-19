@@ -32,7 +32,7 @@ function toNumber(value: Asset["askingPrice"] | null): number | null {
   return Number(value);
 }
 
-function mapAsset(asset: Asset): MarketplaceAsset {
+export function mapAsset(asset: Asset): MarketplaceAsset {
   return {
     id: asset.id,
     title: asset.title,

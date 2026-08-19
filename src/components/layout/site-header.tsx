@@ -7,6 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/cn";
 
+type HeaderSession = {
+  label: string;
+  href: string;
+};
+
+type SiteHeaderProps = {
+  session?: HeaderSession | null;
+};
+
 const navigation = [
   { href: "/assets", label: "Marketplace" },
   { href: "/buyers", label: "Покупці" },
@@ -14,9 +23,11 @@ const navigation = [
   { href: "/resources", label: "Ресурси" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ session = null }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const cabinetActive =
+    pathname === "/dashboard" || pathname === "/manager";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
@@ -46,10 +57,26 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button href="/login" variant="ghost">
-            Вхід
-          </Button>
-          <Button>Почати</Button>
+          {session ? (
+            <>
+              <span className="max-w-[180px] truncate text-sm text-muted">
+                {session.label}
+              </span>
+              <Button
+                href={session.href}
+                variant={cabinetActive ? "primary" : "outline"}
+              >
+                Кабінет
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button href="/login" variant="ghost">
+                Вхід
+              </Button>
+              <Button>Почати</Button>
+            </>
+          )}
         </div>
 
         <button
@@ -99,12 +126,25 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <Button href="/login" variant="outline">
-                Вхід
-              </Button>
-              <Button>Почати</Button>
-            </div>
+            {session ? (
+              <div className="mt-3 space-y-2">
+                <p className="px-3 text-sm text-muted">{session.label}</p>
+                <Button
+                  href={session.href}
+                  className="w-full"
+                  onClick={() => setOpen(false)}
+                >
+                  Кабінет
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Button href="/login" variant="outline">
+                  Вхід
+                </Button>
+                <Button>Почати</Button>
+              </div>
+            )}
           </Container>
         </div>
       ) : null}
