@@ -22,17 +22,24 @@ const statusVariants = {
 type ManagerUserListProps = {
   users: ManagerUserItem[];
   currentUserId: string;
+  filtered?: boolean;
 };
 
-export function ManagerUserList({ users, currentUserId }: ManagerUserListProps) {
+export function ManagerUserList({
+  users,
+  currentUserId,
+  filtered = false,
+}: ManagerUserListProps) {
   if (users.length === 0) {
     return (
       <div className="mt-4 rounded-xl border border-dashed border-border bg-surface px-6 py-12 text-center">
         <p className="text-base font-medium text-foreground">
-          Користувачів ще немає
+          {filtered ? "Нічого не знайдено" : "Користувачів ще немає"}
         </p>
         <p className="mt-2 text-sm text-muted">
-          Коли з’являться акаунти, ви зможете керувати їхнім статусом.
+          {filtered
+            ? "Змініть пошук або фільтри, щоб побачити інших користувачів."
+            : "Коли з’являться акаунти, ви зможете керувати їхнім статусом."}
         </p>
       </div>
     );

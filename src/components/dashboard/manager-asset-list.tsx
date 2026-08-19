@@ -19,16 +19,23 @@ const statusVariants = {
 
 type ManagerAssetListProps = {
   assets: ManagerAssetItem[];
+  filtered?: boolean;
 };
 
-export function ManagerAssetList({ assets }: ManagerAssetListProps) {
+export function ManagerAssetList({
+  assets,
+  filtered = false,
+}: ManagerAssetListProps) {
   if (assets.length === 0) {
     return (
       <div className="mt-4 rounded-xl border border-dashed border-border bg-surface px-6 py-12 text-center">
-        <p className="text-base font-medium text-foreground">Активів ще немає</p>
+        <p className="text-base font-medium text-foreground">
+          {filtered ? "Нічого не знайдено" : "Активів ще немає"}
+        </p>
         <p className="mt-2 text-sm text-muted">
-          Коли продавці додадуть пропозиції, ви зможете їх публікувати або
-          призупиняти.
+          {filtered
+            ? "Змініть пошук або фільтр статусу, щоб побачити інші активи."
+            : "Коли продавці додадуть пропозиції, ви зможете їх публікувати або призупиняти."}
         </p>
       </div>
     );

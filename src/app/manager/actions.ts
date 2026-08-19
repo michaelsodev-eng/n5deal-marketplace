@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   requireManagerUser,
+  removeManagedUser,
   setManagedAssetStatus,
   setManagedUserStatus,
 } from "@/lib/manager";
@@ -19,6 +20,30 @@ export async function updateManagedUserStatusAction(
 ): Promise<ManagerActionState> {
   const manager = await requireManagerUser();
   const intent = String(formData.get("intent") ?? "");
+
+  if (intent === "remove") {
+    try {
+      const result = await removeManagedUser({
+        actorId: manager.id,
+        userId,
+      });
+
+      if (!result.ok) {
+        return { error: result.error };
+      }
+    } catch (error) {
+      console.error("Remove managed user failed", error);
+      return { error: "Не вдалося видалити користувача. Спробуйте пізніше." };
+    }
+
+    revalidatePath("/manager");
+    revalidatePath("/dashboard");
+    revalidatePath("/assets");
+    revalidatePath("/buyers");
+    revalidatePath("/sellers");
+    return { success: true };
+  }
+
   const status =
     intent === "activate"
       ? "ACTIVE"

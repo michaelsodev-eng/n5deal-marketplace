@@ -1,3 +1,4 @@
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { mapAsset } from "@/lib/assets";
 import {
@@ -7,6 +8,7 @@ import {
   type ContactRequestListItem,
 } from "@/lib/contact-requests";
 import type { MarketplaceAsset } from "@/lib/marketplace";
+import type { ManagerFilterState } from "@/lib/manager-filters";
 
 export type BuyerDashboardData = {
   companyName: string;
@@ -174,7 +176,73 @@ export async function getSellerDashboardData(input: {
   };
 }
 
-export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
+export async function getManagerDashboardData(
+  filters: ManagerFilterState,
+): Promise<ManagerDashboardData> {
+  const userWhere: Prisma.UserWhereInput = {};
+  const userConditions: Prisma.UserWhereInput[] = [];
+
+  if (filters.role !== "all") {
+    userWhere.role = filters.role as Prisma.UserWhereInput["role"];
+  }
+
+  if (filters.userStatus !== "all") {
+    userWhere.status = filters.userStatus as Prisma.UserWhereInput["status"];
+  }
+
+  if (filters.userQ) {
+    userConditions.push({
+      OR: [
+        { email: { contains: filters.userQ, mode: "insensitive" } },
+        {
+          buyerProfile: {
+            companyName: { contains: filters.userQ, mode: "insensitive" },
+          },
+        },
+        {
+          sellerProfile: {
+            companyName: { contains: filters.userQ, mode: "insensitive" },
+          },
+        },
+      ],
+    });
+  }
+
+  if (userConditions.length > 0) {
+    userWhere.AND = userConditions;
+  }
+
+  const assetWhere: Prisma.AssetWhereInput = {};
+  const assetConditions: Prisma.AssetWhereInput[] = [];
+
+  if (filters.assetStatus !== "all") {
+    assetWhere.status = filters.assetStatus as Prisma.AssetWhereInput["status"];
+  }
+
+  if (filters.assetQ) {
+    assetConditions.push({
+      OR: [
+        { title: { contains: filters.assetQ, mode: "insensitive" } },
+        {
+          seller: {
+            companyName: { contains: filters.assetQ, mode: "insensitive" },
+          },
+        },
+        {
+          seller: {
+            user: {
+              email: { contains: filters.assetQ, mode: "insensitive" },
+            },
+          },
+        },
+      ],
+    });
+  }
+
+  if (assetConditions.length > 0) {
+    assetWhere.AND = assetConditions;
+  }
+
   const [
     userCount,
     buyerCount,
@@ -191,6 +259,7 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
     prisma.asset.count({ where: { status: "PUBLISHED" } }),
     prisma.contactRequest.count(),
     prisma.user.findMany({
+      where: userWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -202,6 +271,7 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
       },
     }),
     prisma.asset.findMany({
+      where: assetWhere,
       orderBy: { createdAt: "desc" },
       include: {
         seller: {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/button";
 import { updateManagedUserStatusAction } from "@/app/manager/actions";
+import { Button } from "@/components/ui/button";
 
 type ManagerUserActionsProps = {
   userId: string;
@@ -16,22 +16,47 @@ export function ManagerUserActions({ userId, status }: ManagerUserActionsProps) 
 
   return (
     <div className="space-y-2">
-      <form action={formAction}>
-        <Button
-          type="submit"
-          name="intent"
-          value={nextIntent}
-          size="sm"
-          variant={nextIntent === "activate" ? "primary" : "outline"}
-          disabled={pending}
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <form action={formAction}>
+          <Button
+            type="submit"
+            name="intent"
+            value={nextIntent}
+            size="sm"
+            variant={nextIntent === "activate" ? "primary" : "outline"}
+            disabled={pending}
+          >
+            {pending
+              ? "Збереження..."
+              : nextIntent === "activate"
+                ? "Активувати"
+                : "Призупинити"}
+          </Button>
+        </form>
+        <form
+          action={formAction}
+          onSubmit={(event) => {
+            if (
+              !window.confirm(
+                "Видалити цього користувача разом із профілем, активами та запитами?",
+              )
+            ) {
+              event.preventDefault();
+            }
+          }}
         >
-          {pending
-            ? "Збереження..."
-            : nextIntent === "activate"
-              ? "Активувати"
-              : "Призупинити"}
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            name="intent"
+            value="remove"
+            size="sm"
+            variant="outline"
+            disabled={pending}
+          >
+            {pending ? "Видалення..." : "Видалити"}
+          </Button>
+        </form>
+      </div>
       {state.error ? (
         <p role="alert" className="text-sm text-red-600">
           {state.error}

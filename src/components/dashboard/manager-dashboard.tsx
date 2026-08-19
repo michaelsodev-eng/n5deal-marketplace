@@ -1,17 +1,28 @@
 import { LogoutButton } from "@/components/auth/logout-button";
 import { ContactRequestList } from "@/components/dashboard/contact-request-list";
 import { ManagerAssetList } from "@/components/dashboard/manager-asset-list";
+import { ManagerFilters } from "@/components/dashboard/manager-filters";
 import { ManagerUserList } from "@/components/dashboard/manager-user-list";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Container } from "@/components/ui/container";
 import type { ManagerDashboardData } from "@/lib/dashboard";
+import {
+  hasActiveAssetFilters,
+  hasActiveUserFilters,
+  type ManagerFilterState,
+} from "@/lib/manager-filters";
 
 type ManagerDashboardProps = {
   data: ManagerDashboardData;
   currentUserId: string;
+  filters: ManagerFilterState;
 };
 
-export function ManagerDashboard({ data, currentUserId }: ManagerDashboardProps) {
+export function ManagerDashboard({
+  data,
+  currentUserId,
+  filters,
+}: ManagerDashboardProps) {
   return (
     <section className="py-8 sm:py-12">
       <Container size="full">
@@ -41,18 +52,27 @@ export function ManagerDashboard({ data, currentUserId }: ManagerDashboardProps)
           <StatCard label="Запити на контакт" value={data.contactCount} />
         </div>
 
+        <ManagerFilters filters={filters} />
+
         <div className="mt-10">
           <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Користувачі
           </h2>
-          <ManagerUserList users={data.users} currentUserId={currentUserId} />
+          <ManagerUserList
+            users={data.users}
+            currentUserId={currentUserId}
+            filtered={hasActiveUserFilters(filters)}
+          />
         </div>
 
         <div className="mt-10">
           <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Активи
           </h2>
-          <ManagerAssetList assets={data.managedAssets} />
+          <ManagerAssetList
+            assets={data.managedAssets}
+            filtered={hasActiveAssetFilters(filters)}
+          />
         </div>
 
         <div className="mt-10">

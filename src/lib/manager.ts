@@ -48,6 +48,30 @@ export async function setManagedUserStatus(input: {
   return { ok: true };
 }
 
+export async function removeManagedUser(input: {
+  actorId: string;
+  userId: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (input.actorId === input.userId) {
+    return { ok: false, error: "Ви не можете видалити власний акаунт." };
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { id: input.userId },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    return { ok: false, error: "Користувача не знайдено." };
+  }
+
+  await prisma.user.delete({
+    where: { id: input.userId },
+  });
+
+  return { ok: true };
+}
+
 export async function setManagedAssetStatus(input: {
   assetId: string;
   status: "PUBLISHED" | "SUSPENDED";
