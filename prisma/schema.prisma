@@ -45,6 +45,7 @@ model User {
   sellerProfile    SellerProfile?
   sentContacts     ContactRequest[] @relation("ContactSender")
   receivedContacts ContactRequest[] @relation("ContactRecipient")
+  sessions         Session[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 }
@@ -113,4 +114,15 @@ model ContactRequest {
   @@index([senderId])
   @@index([recipientId])
   @@index([assetId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
