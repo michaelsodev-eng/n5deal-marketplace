@@ -52,7 +52,9 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
               href={item.href}
               className={cn(
                 "cursor-pointer text-sm font-medium transition-colors hover:text-primary",
-                pathname === item.href ? "text-primary" : "text-muted",
+                pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  ? "text-primary"
+                  : "text-muted",
               )}
             >
               {item.label}
@@ -126,7 +128,7 @@ export function SiteHeader({ session = null }: SiteHeaderProps) {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "cursor-pointer rounded-lg px-3 py-2.5 text-sm font-medium",
-                  pathname === item.href
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
                     ? "bg-primary-soft text-primary"
                     : "text-foreground hover:bg-slate-50",
                 )}

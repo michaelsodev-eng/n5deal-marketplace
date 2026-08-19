@@ -58,7 +58,7 @@ export function HomeHero() {
           <Button href="/assets" size="lg">
             Дослідити торговельний майданчик
           </Button>
-          <Button href="/sellers" variant="outline" size="lg">
+          <Button href="/register" variant="outline" size="lg">
             Продати свій бізнес
           </Button>
         </div>

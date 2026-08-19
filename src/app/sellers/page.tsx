@@ -1,48 +1,58 @@
 import type { Metadata } from "next";
-import { Card } from "@/components/ui/card";
-import { Container } from "@/components/ui/container";
-import { SectionHeading } from "@/components/ui/section-heading";
+import { redirect } from "next/navigation";
+import { SellersMarketplaceView } from "@/components/sellers/sellers-marketplace-view";
+import {
+  SELLER_MARKETPLACE_PAGE_SIZE,
+  buildSellerMarketplaceHref,
+  parseSellerMarketplaceSearchParams,
+} from "@/lib/seller-marketplace";
+import { getSellerMarketplacePageData } from "@/lib/sellers";
 
 export const metadata: Metadata = {
   title: "Продавці",
+  description:
+    "Перегляд компаній, які продають бізнес і активи на N5Deal Marketplace.",
 };
 
-const items = [
-  {
-    title: "Підготуйте профіль бізнесу",
-    description:
-      "Опишіть актив, галузь, країну та ключові фінансові показники в єдиному форматі.",
-  },
-  {
-    title: "Охопіть кваліфікованих покупців",
-    description:
-      "Ваша пропозиція стає доступною інвесторам, які шукають угоди у вашому сегменті.",
-  },
-  {
-    title: "Керуйте запитами",
-    description:
-      "Отримуйте звернення зацікавлених сторін і відстежуйте статус контактів.",
-  },
-];
+export default async function SellersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const filters = parseSellerMarketplaceSearchParams(params);
+  const result = await getSellerMarketplacePageData(filters);
 
-export default function SellersPage() {
+  if (result.ok && result.data.page !== filters.page) {
+    redirect(buildSellerMarketplaceHref({ ...filters, page: result.data.page }));
+  }
+
+  if (!result.ok) {
+    return (
+      <SellersMarketplaceView
+        sellers={[]}
+        total={0}
+        page={1}
+        pageSize={SELLER_MARKETPLACE_PAGE_SIZE}
+        totalPages={0}
+        filters={filters}
+        countries={[]}
+        industries={[]}
+        error={result.error}
+      />
+    );
+  }
+
   return (
-    <section className="py-12 sm:py-16">
-      <Container size="wide">
-        <SectionHeading
-          eyebrow="Для продавців"
-          title="Продайте бізнес через професійний майданчик"
-          description="Розміщуйте компанії та активи в структурованому каталозі, зручному для B2B-покупців і інвестиційних команд."
-        />
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {items.map((item) => (
-            <Card key={item.title} className="p-6">
-              <h2 className="text-base font-semibold text-foreground">{item.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{item.description}</p>
-            </Card>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <SellersMarketplaceView
+      sellers={result.data.sellers}
+      total={result.data.total}
+      page={result.data.page}
+      pageSize={result.data.pageSize}
+      totalPages={result.data.totalPages}
+      filters={{ ...filters, page: result.data.page }}
+      countries={result.data.countries}
+      industries={result.data.industries}
+    />
   );
 }
