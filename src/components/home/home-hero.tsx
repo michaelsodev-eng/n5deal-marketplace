@@ -40,7 +40,7 @@ export function HomeHero() {
         >
           <div className="flex-1">
             <Input
-              name="q"
+              name="search"
               type="search"
               placeholder="Пошук за галуззю, країною або типом активу"
               aria-label="Пошук можливостей"

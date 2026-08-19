@@ -1,9 +1,25 @@
-import type { MockAsset } from "@/data/assets";
+export type MarketplaceAssetStatus = "DRAFT" | "PUBLISHED" | "SUSPENDED";
 
-export type SortKey = "newest" | "price-desc" | "price-asc" | "revenue-desc";
+export type MarketplaceAsset = {
+  id: string;
+  title: string;
+  description: string;
+  assetType: string;
+  industry: string;
+  country: string;
+  askingPrice: number;
+  revenue: number | null;
+  ebitda: number | null;
+  employees: number | null;
+  foundedYear: number | null;
+  listedAt: string;
+  status: MarketplaceAssetStatus;
+};
+
+export type SortKey = "newest" | "price-asc" | "price-desc" | "ebitda-desc";
 
 export type MarketplaceFilterState = {
-  query: string;
+  search: string;
   assetType: string;
   country: string;
   industry: string;
@@ -12,10 +28,17 @@ export type MarketplaceFilterState = {
   ebitda: string;
   employees: string;
   sort: SortKey;
+  page: number;
 };
 
+export type SearchParamsInput = {
+  [key: string]: string | string[] | undefined;
+};
+
+export const MARKETPLACE_PAGE_SIZE = 10;
+
 export const defaultMarketplaceFilters: MarketplaceFilterState = {
-  query: "",
+  search: "",
   assetType: "all",
   country: "all",
   industry: "all",
@@ -24,6 +47,7 @@ export const defaultMarketplaceFilters: MarketplaceFilterState = {
   ebitda: "any",
   employees: "any",
   sort: "newest",
+  page: 1,
 };
 
 export const priceRangeOptions = [
@@ -58,71 +82,137 @@ export const employeeRangeOptions = [
 
 export const sortOptions = [
   { value: "newest", label: "Спочатку новіші" },
-  { value: "price-desc", label: "Ціна: від вищої" },
   { value: "price-asc", label: "Ціна: від нижчої" },
-  { value: "revenue-desc", label: "Дохід: від вищого" },
+  { value: "price-desc", label: "Ціна: від вищої" },
+  { value: "ebitda-desc", label: "EBITDA: від вищої" },
 ];
 
-export function matchesRange(value: number | null, range: string) {
-  if (range === "any") {
-    return true;
+const SORT_VALUES: SortKey[] = [
+  "newest",
+  "price-asc",
+  "price-desc",
+  "ebitda-desc",
+];
+
+function readParam(params: SearchParamsInput, key: string): string {
+  const value = params[key];
+
+  if (Array.isArray(value)) {
+    return value[0]?.trim() ?? "";
   }
 
-  if (value == null) {
-    return false;
-  }
-
-  const [min, max] = range.split("-").map(Number);
-  return value >= min && value <= max;
+  return value?.trim() ?? "";
 }
 
-export function filterMarketplaceAssets(
-  assets: MockAsset[],
-  filters: MarketplaceFilterState,
-) {
-  const normalizedQuery = filters.query.trim().toLowerCase();
+function normalizeFilterValue(value: string): string {
+  if (!value || value === "all") {
+    return "all";
+  }
 
-  const next = assets.filter((asset) => {
-    const matchesQuery =
-      normalizedQuery.length === 0 ||
-      [asset.title, asset.description, asset.industry, asset.country, asset.assetType]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery);
+  return value.slice(0, 80);
+}
 
-    const matchesType =
-      filters.assetType === "all" || asset.assetType === filters.assetType;
-    const matchesCountry =
-      filters.country === "all" || asset.country === filters.country;
-    const matchesIndustry =
-      filters.industry === "all" || asset.industry === filters.industry;
+function normalizeRange(
+  value: string,
+  options: Array<{ value: string }>,
+): string {
+  return options.some((option) => option.value === value) ? value : "any";
+}
 
-    return (
-      matchesQuery &&
-      matchesType &&
-      matchesCountry &&
-      matchesIndustry &&
-      matchesRange(asset.askingPrice, filters.price) &&
-      matchesRange(asset.revenue, filters.revenue) &&
-      matchesRange(asset.ebitda, filters.ebitda) &&
-      matchesRange(asset.employees, filters.employees)
-    );
-  });
+export function parseNumericRange(
+  value: string,
+): { gte: number; lte: number } | undefined {
+  if (value === "any") {
+    return undefined;
+  }
 
-  next.sort((a, b) => {
-    if (filters.sort === "price-desc") {
-      return b.askingPrice - a.askingPrice;
-    }
-    if (filters.sort === "price-asc") {
-      return a.askingPrice - b.askingPrice;
-    }
-    if (filters.sort === "revenue-desc") {
-      return (b.revenue ?? 0) - (a.revenue ?? 0);
-    }
-    return Date.parse(b.listedAt) - Date.parse(a.listedAt);
-  });
+  const [minRaw, maxRaw] = value.split("-");
+  const gte = Number(minRaw);
+  const lte = Number(maxRaw);
 
-  return next;
+  if (!Number.isFinite(gte) || !Number.isFinite(lte) || gte > lte) {
+    return undefined;
+  }
+
+  return { gte, lte };
+}
+
+export function parseMarketplaceSearchParams(
+  params: SearchParamsInput,
+): MarketplaceFilterState {
+  const search = (readParam(params, "search") || readParam(params, "q")).slice(
+    0,
+    120,
+  );
+  const sortRaw = readParam(params, "sort");
+  const sort = SORT_VALUES.includes(sortRaw as SortKey)
+    ? (sortRaw as SortKey)
+    : "newest";
+  const pageRaw = Number.parseInt(readParam(params, "page"), 10);
+  const page = Number.isInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+
+  return {
+    search,
+    assetType: normalizeFilterValue(readParam(params, "assetType")),
+    country: normalizeFilterValue(readParam(params, "country")),
+    industry: normalizeFilterValue(readParam(params, "industry")),
+    price: normalizeRange(readParam(params, "price"), priceRangeOptions),
+    revenue: normalizeRange(readParam(params, "revenue"), revenueRangeOptions),
+    ebitda: normalizeRange(readParam(params, "ebitda"), ebitdaRangeOptions),
+    employees: normalizeRange(
+      readParam(params, "employees"),
+      employeeRangeOptions,
+    ),
+    sort,
+    page,
+  };
+}
+
+export function buildMarketplaceHref(filters: MarketplaceFilterState): string {
+  const params = new URLSearchParams();
+
+  if (filters.search) {
+    params.set("search", filters.search);
+  }
+
+  if (filters.country !== "all") {
+    params.set("country", filters.country);
+  }
+
+  if (filters.industry !== "all") {
+    params.set("industry", filters.industry);
+  }
+
+  if (filters.assetType !== "all") {
+    params.set("assetType", filters.assetType);
+  }
+
+  if (filters.price !== "any") {
+    params.set("price", filters.price);
+  }
+
+  if (filters.revenue !== "any") {
+    params.set("revenue", filters.revenue);
+  }
+
+  if (filters.ebitda !== "any") {
+    params.set("ebitda", filters.ebitda);
+  }
+
+  if (filters.employees !== "any") {
+    params.set("employees", filters.employees);
+  }
+
+  if (filters.sort !== "newest") {
+    params.set("sort", filters.sort);
+  }
+
+  if (filters.page > 1) {
+    params.set("page", String(filters.page));
+  }
+
+  const query = params.toString();
+  return query ? `/assets?${query}` : "/assets";
 }
 
 export function countActiveFilters(filters: MarketplaceFilterState) {

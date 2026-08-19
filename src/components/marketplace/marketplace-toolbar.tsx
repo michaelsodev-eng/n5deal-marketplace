@@ -3,11 +3,11 @@
 import { CategoryTabs } from "@/components/marketplace/category-tabs";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { assetCategories } from "@/data/assets";
 import { pluralizeAssets } from "@/lib/format";
 import { sortOptions, type SortKey } from "@/lib/marketplace";
 
 type MarketplaceToolbarProps = {
+  categories: readonly string[];
   category: string;
   resultCount: number;
   sort: SortKey;
@@ -19,6 +19,7 @@ type MarketplaceToolbarProps = {
 };
 
 export function MarketplaceToolbar({
+  categories,
   category,
   resultCount,
   sort,
@@ -31,7 +32,7 @@ export function MarketplaceToolbar({
   return (
     <div className="mt-6 space-y-4">
       <CategoryTabs
-        categories={assetCategories}
+        categories={categories}
         value={category}
         onChange={onCategoryChange}
       />

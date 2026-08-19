@@ -1,75 +1,91 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MarketInsights } from "@/components/marketplace/market-insights";
 import { MarketplaceFilters } from "@/components/marketplace/marketplace-filters";
 import { MarketplaceHeader } from "@/components/marketplace/marketplace-header";
+import { MarketplacePagination } from "@/components/marketplace/marketplace-pagination";
 import { MarketplaceResults } from "@/components/marketplace/marketplace-results";
 import { MarketplaceToolbar } from "@/components/marketplace/marketplace-toolbar";
 import { Container } from "@/components/ui/container";
-import { getPublishedAssets, uniqueValues } from "@/data/assets";
 import {
+  buildMarketplaceHref,
   countActiveFilters,
   defaultMarketplaceFilters,
-  filterMarketplaceAssets,
+  type MarketplaceAsset,
   type MarketplaceFilterState,
 } from "@/lib/marketplace";
 
 type MarketplaceViewProps = {
-  initialQuery?: string;
+  assets: MarketplaceAsset[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  filters: MarketplaceFilterState;
+  countries: string[];
+  industries: string[];
+  assetTypes: string[];
+  error?: string;
 };
 
-const publishedAssets = getPublishedAssets();
-
-export function MarketplaceView({ initialQuery = "" }: MarketplaceViewProps) {
+export function MarketplaceView({
+  assets,
+  total,
+  page,
+  pageSize,
+  totalPages,
+  filters,
+  countries,
+  industries,
+  assetTypes,
+  error,
+}: MarketplaceViewProps) {
+  const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<MarketplaceFilterState>({
-    ...defaultMarketplaceFilters,
-    query: initialQuery,
-  });
 
-  const countries = uniqueValues(publishedAssets, "country");
-  const industries = uniqueValues(publishedAssets, "industry");
-  const assetTypes = uniqueValues(publishedAssets, "assetType");
-
-  const filteredAssets = useMemo(
-    () => filterMarketplaceAssets(publishedAssets, filters),
-    [filters],
-  );
-
+  const categories = ["Усі", ...assetTypes];
+  const category = filters.assetType === "all" ? "Усі" : filters.assetType;
   const activeFilterCount = countActiveFilters(filters);
-  const category =
-    filters.assetType === "all" ? "Усі" : filters.assetType;
 
-  function patchFilters(patch: Partial<MarketplaceFilterState>) {
-    setFilters((current) => ({ ...current, ...patch }));
+  function navigate(patch: Partial<MarketplaceFilterState>) {
+    const shouldResetPage = patch.page === undefined;
+    const next: MarketplaceFilterState = {
+      ...filters,
+      ...patch,
+      page: shouldResetPage ? 1 : (patch.page ?? 1),
+    };
+
+    router.push(buildMarketplaceHref(next));
   }
 
   function resetFilters() {
-    setFilters((current) => ({
+    navigate({
       ...defaultMarketplaceFilters,
-      query: current.query,
-      sort: current.sort,
-    }));
+      search: filters.search,
+      sort: filters.sort,
+    });
   }
 
   return (
     <section className="py-8 sm:py-12">
       <Container size="full">
         <MarketplaceHeader
-          query={filters.query}
-          onQueryChange={(query) => patchFilters({ query })}
+          query={filters.search}
+          onSearchSubmit={(search) => navigate({ search })}
         />
         <MarketplaceToolbar
+          categories={categories}
           category={category}
-          resultCount={filteredAssets.length}
+          resultCount={total}
           sort={filters.sort}
           filtersOpen={filtersOpen}
           activeFilterCount={activeFilterCount}
           onCategoryChange={(value) =>
-            patchFilters({ assetType: value === "Усі" ? "all" : value })
+            navigate({ assetType: value === "Усі" ? "all" : value })
           }
-          onSortChange={(sort) => patchFilters({ sort })}
+          onSortChange={(sort) => navigate({ sort })}
           onToggleFilters={() => setFiltersOpen((value) => !value)}
         />
         <div className="mt-6 grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_280px]">
@@ -79,10 +95,30 @@ export function MarketplaceView({ initialQuery = "" }: MarketplaceViewProps) {
             countries={countries}
             industries={industries}
             assetTypes={assetTypes}
-            onChange={patchFilters}
+            onChange={navigate}
             onReset={resetFilters}
           />
-          <MarketplaceResults assets={filteredAssets} />
+          <div className="min-w-0 space-y-4">
+            {error ? (
+              <div className="rounded-xl border border-border bg-surface px-6 py-16 text-center shadow-card">
+                <p className="text-base font-medium text-foreground">
+                  Пропозиції недоступні
+                </p>
+                <p className="mt-2 text-sm text-muted">{error}</p>
+              </div>
+            ) : (
+              <>
+                <MarketplaceResults assets={assets} />
+                <MarketplacePagination
+                  page={page}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
+                  total={total}
+                  filters={filters}
+                />
+              </>
+            )}
+          </div>
           <div className="xl:block">
             <MarketInsights />
           </div>

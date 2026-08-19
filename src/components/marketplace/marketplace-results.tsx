@@ -1,8 +1,8 @@
 import { AssetCard } from "@/components/assets/asset-card";
-import type { MockAsset } from "@/data/assets";
+import type { MarketplaceAsset } from "@/lib/marketplace";
 
 type MarketplaceResultsProps = {
-  assets: MockAsset[];
+  assets: MarketplaceAsset[];
 };
 
 export function MarketplaceResults({ assets }: MarketplaceResultsProps) {

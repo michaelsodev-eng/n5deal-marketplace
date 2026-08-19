@@ -2,18 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CountryMark } from "@/components/assets/country-mark";
-import type { MockAsset } from "@/data/assets";
+import type { MarketplaceAsset } from "@/lib/marketplace";
 import { formatCompactMoney, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-const statusLabels: Record<MockAsset["status"], string> = {
+const statusLabels: Record<MarketplaceAsset["status"], string> = {
   PUBLISHED: "У продажу",
   DRAFT: "Чернетка",
   SUSPENDED: "Призупинено",
 };
 
 const statusVariants: Record<
-  MockAsset["status"],
+  MarketplaceAsset["status"],
   "success" | "neutral" | "warning"
 > = {
   PUBLISHED: "success",
@@ -22,7 +22,7 @@ const statusVariants: Record<
 };
 
 type AssetCardProps = {
-  asset: MockAsset;
+  asset: MarketplaceAsset;
 };
 
 export function AssetCard({ asset }: AssetCardProps) {

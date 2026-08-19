@@ -1,20 +1,7 @@
-export type AssetStatus = "DRAFT" | "PUBLISHED" | "SUSPENDED";
+import type { MarketplaceAsset } from "@/lib/marketplace";
 
-export type MockAsset = {
-  id: string;
-  title: string;
-  description: string;
-  assetType: string;
-  industry: string;
-  country: string;
-  askingPrice: number;
-  revenue: number | null;
-  ebitda: number | null;
-  employees: number | null;
-  foundedYear: number | null;
-  listedAt: string;
-  status: AssetStatus;
-};
+export type AssetStatus = MarketplaceAsset["status"];
+export type MockAsset = MarketplaceAsset;
 
 export const mockAssets: MockAsset[] = [
   {
@@ -186,13 +173,6 @@ export const featuredAssetIds = [
   "renewable-energy",
 ];
 
-export const assetCategories = [
-  "Усі",
-  "Бізнес",
-  "Компанія",
-  "Інвестиційний актив",
-] as const;
-
 export function getPublishedAssets(): MockAsset[] {
   return mockAssets.filter((asset) => asset.status === "PUBLISHED");
 }
@@ -201,13 +181,4 @@ export function getFeaturedAssets(): MockAsset[] {
   return featuredAssetIds
     .map((id) => mockAssets.find((asset) => asset.id === id))
     .filter((asset): asset is MockAsset => Boolean(asset));
-}
-
-export function uniqueValues(
-  assets: MockAsset[],
-  key: "country" | "industry" | "assetType",
-): string[] {
-  return [...new Set(assets.map((asset) => asset[key]))].sort((a, b) =>
-    a.localeCompare(b, "uk"),
-  );
 }

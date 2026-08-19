@@ -19,12 +19,12 @@ function SearchIcon() {
 
 type MarketplaceHeaderProps = {
   query: string;
-  onQueryChange: (value: string) => void;
+  onSearchSubmit: (value: string) => void;
 };
 
 export function MarketplaceHeader({
   query,
-  onQueryChange,
+  onSearchSubmit,
 }: MarketplaceHeaderProps) {
   return (
     <div>
@@ -41,12 +41,19 @@ export function MarketplaceHeader({
         Відібрані бізнеси, компанії та інвестиційні активи для покупців, які
         оцінюють угоди за фінансовими показниками, галуззю та географією.
       </p>
-      <form className="mt-6" onSubmit={(event) => event.preventDefault()}>
+      <form
+        className="mt-6"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          onSearchSubmit(String(formData.get("search") ?? "").trim());
+        }}
+      >
         <Input
-          name="q"
+          key={query}
+          name="search"
           type="search"
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
+          defaultValue={query}
           placeholder="Пошук за назвою, країною, галуззю або типом активу"
           aria-label="Пошук активів"
           icon={<SearchIcon />}
